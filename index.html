@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PEI Blindado — Pare de Adivinhar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#45522E;
+    --primary-light:#5C6E3D;
+    --cta:#C1502E;
+    --cta-dark:#A23F22;
+    --bg:#FBF8F2;
+    --bg-alt:#F1E8D9;
+    --text:#2E2A22;
+    --text-soft:#6B6152;
+    --check:#6E8B4A;
+    --white:#ffffff;
+    --line: rgba(69,82,46,0.14);
+    --shadow: 0 20px 50px -20px rgba(69,82,46,0.35);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    color:var(--primary);
+    line-height:1.15;
+    letter-spacing:-0.01em;
+  }
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.02em;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 clamp(18px, 5vw, 24px);}
+  a{color:inherit;}
+
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(18px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes stampIn{
+    0%{transform: rotate(-14deg) scale(0.4); opacity:0;}
+    60%{transform: rotate(-8deg) scale(1.08); opacity:1;}
+    100%{transform: rotate(-10deg) scale(1); opacity:1;}
+  }
+  @keyframes floatCard{
+    0%,100%{transform: rotate(3deg) translateY(0);}
+    50%{transform: rotate(3deg) translateY(-8px);}
+  }
+  .reveal{animation: fadeUp 0.7s cubic-bezier(.22,1,.36,1) both;}
+  .d1{animation-delay:.05s;} .d2{animation-delay:.15s;} .d3{animation-delay:.25s;}
+  .d4{animation-delay:.35s;} .d5{animation-delay:.45s;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important;}
+  }
+
+  /* ===== TOPBAR ===== */
+  .topbar{
+    background:var(--primary);
+    color:var(--bg-alt);
+    text-align:center;
+    font-size:0.82rem;
+    padding:9px 16px;
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.03em;
+  }
+  .topbar b{color:#fff;}
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:76px 0 90px;
+    background:
+      radial-gradient(1100px 500px at 85% -10%, rgba(110,139,74,0.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(193,80,46,0.08), transparent 60%),
+      var(--bg);
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:56px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    color:var(--primary);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.74rem;
+    font-weight:600;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:7px 14px;
+    border-radius:100px;
+    margin-bottom:22px;
+  }
+  .eyebrow::before{content:"●"; color:var(--cta); font-size:0.6rem;}
+  .hero h1{
+    font-size:clamp(2.1rem, 4.2vw, 3.15rem);
+    margin-bottom:20px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--cta);
+  }
+  .hero p.sub{
+    font-size:1.14rem;
+    color:var(--text-soft);
+    max-width:540px;
+    margin-bottom:34px;
+  }
+  .cta-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--cta);
+    color:#fff;
+    font-weight:700;
+    font-size:1.02rem;
+    padding:18px 30px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 14px 30px -10px rgba(193,80,46,0.55);
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+    text-decoration:none;
+  }
+  .cta-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 20px 38px -10px rgba(193,80,46,0.65);
+    background:var(--cta-dark);
+  }
+  .cta-sub{
+    margin-top:14px;
+    font-size:0.85rem;
+    color:var(--text-soft);
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  /* Document mockup */
+  .doc-stage{ position:relative; height:440px; }
+  .doc-card{
+    position:absolute;
+    top:8px; left:30px; right:0;
+    background:#fff;
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:30px 28px;
+    transform:rotate(3deg);
+    animation: floatCard 6s ease-in-out infinite;
+    border:1px solid var(--line);
+  }
+  .doc-card .doc-head{
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:2px solid var(--bg-alt);
+    padding-bottom:12px; margin-bottom:16px;
+  }
+  .doc-card .doc-head span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.68rem;
+    color:var(--text-soft);
+    letter-spacing:0.05em;
+  }
+  .doc-line{
+    height:9px;
+    border-radius:4px;
+    background:var(--bg-alt);
+    margin-bottom:11px;
+  }
+  .doc-line.w80{width:80%;} .doc-line.w60{width:60%;} .doc-line.w95{width:95%;}
+  .doc-line.error{
+    background:transparent;
+    color:#c0392b;
+    text-decoration:line-through;
+    font-size:0.82rem;
+    height:auto;
+    font-family:'IBM Plex Mono', monospace;
+    margin-bottom:8px;
+  }
+  .doc-line.fixed{
+    background:transparent;
+    color:#4F6B2A;
+    font-size:0.82rem;
+    height:auto;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    margin-bottom:11px;
+  }
+  .stamp{
+    position:absolute;
+    bottom:-18px; right:-14px;
+    width:132px; height:132px;
+    border-radius:50%;
+    border:3.5px solid var(--check);
+    color:var(--check);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    letter-spacing:0.05em;
+    transform:rotate(-10deg);
+    background:rgba(255,255,255,0.9);
+    animation: stampIn 0.9s 0.6s cubic-bezier(.34,1.56,.64,1) both;
+    box-shadow:0 10px 26px -8px rgba(110,139,74,0.5);
+  }
+
+  /* ===== SECTION SHARED ===== */
+  section{padding:88px 0;}
+  .section-head{max-width:640px; margin:0 auto 52px; text-align:center;}
+  .section-head .eyebrow{margin-bottom:16px;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.3rem);}
+  .section-head p{color:var(--text-soft); margin-top:14px; font-size:1.05rem;}
+
+  /* ===== VANTAGENS ===== */
+  .vantagens{background:var(--bg-alt);}
+  .vant-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px;}
+  .vant-item{
+    background:#fff;
+    border-radius:12px;
+    padding:26px 24px;
+    display:flex;
+    gap:16px;
+    border:1px solid var(--line);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .vant-item:hover{transform:translateY(-4px); box-shadow:0 16px 30px -16px rgba(69,82,46,0.3);}
+  .vant-item .ico{
+    flex-shrink:0;
+    width:38px;height:38px;
+    border-radius:9px;
+    background:var(--primary);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+  }
+  .vant-item p{color:var(--text); font-size:0.97rem;}
+
+  /* ===== ENTREGAVEIS ===== */
+  .entreg-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  .entreg-card{
+    background:#fff;
+    border-radius:16px;
+    padding:28px 24px;
+    border:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .entreg-card::after{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg, var(--check), var(--primary));
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .3s ease;
+  }
+  .entreg-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 20px 36px -18px rgba(69,82,46,0.32);
+    border-color:transparent;
+  }
+  .entreg-card:hover::after{transform:scaleX(1);}
+  .entreg-card.is-core{grid-column:span 1;}
+  .entreg-card.is-hero{
+    grid-column:span 3;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:22px;
+    align-items:flex-start;
+    background:var(--bg-alt);
+    border-color:transparent;
+  }
+  .entreg-icon{
+    width:52px; height:52px;
+    border-radius:13px;
+    background:var(--bg-alt);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem;
+    margin-bottom:16px;
+  }
+  .entreg-card.is-hero .entreg-icon{
+    background:#fff;
+    margin-bottom:0;
+    width:64px; height:64px;
+    font-size:1.8rem;
+    flex-shrink:0;
+  }
+  .entreg-card h3{font-size:1.08rem; margin-bottom:8px;}
+  .entreg-card p{color:var(--text-soft); font-size:0.93rem; line-height:1.55;}
+  .entreg-tag{
+    position:absolute;
+    top:16px; right:16px;
+    background:rgba(193,80,46,0.12);
+    color:var(--cta-dark);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.62rem;
+    font-weight:700;
+    letter-spacing:0.05em;
+    padding:4px 9px;
+    border-radius:100px;
+  }
+  .entreg-count{
+    text-align:center;
+    margin-top:36px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.85rem;
+    color:var(--text-soft);
+  }
+  .entreg-count b{color:var(--primary);}
+
+  /* ===== PARA QUEM ===== */
+  .paraquem{
+    background:
+      radial-gradient(700px 400px at 90% 0%, rgba(110,139,74,0.16), transparent 60%),
+      radial-gradient(600px 400px at 5% 100%, rgba(193,80,46,0.10), transparent 60%),
+      var(--primary);
+    color:#fff;
+  }
+  .paraquem h2{color:#fff;}
+  .paraquem .section-head p{color:rgba(255,255,255,0.72);}
+  .pq-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  .pq-item{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:12px;
+    padding:22px 24px;
+    font-size:0.98rem;
+    display:flex;
+    gap:14px;
+  }
+  .pq-item::before{content:"→"; color:var(--check); font-weight:700; flex-shrink:0;}
+
+  /* ===== BONUS ===== */
+  .bonus-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px;}
+  .bonus-card{
+    background:#fff;
+    border:1.5px dashed var(--cta);
+    border-radius:14px;
+    padding:28px;
+    position:relative;
+  }
+  .bonus-tag{
+    position:absolute; top:-13px; left:24px;
+    background:var(--cta);
+    color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem;
+    font-weight:700;
+    padding:5px 12px;
+    border-radius:100px;
+    letter-spacing:0.04em;
+  }
+  .bonus-card h3{font-size:1.1rem; margin:10px 0 8px;}
+  .bonus-card p{color:var(--text-soft); font-size:0.94rem;}
+  .bonus-value{
+    margin-top:14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.82rem;
+    color:var(--text-soft);
+    text-decoration:line-through;
+  }
+
+  /* ===== OFERTA ===== */
+  .oferta{background:var(--bg-alt);}
+  .oferta-card{
+    position:relative;
+    max-width:560px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:22px;
+    box-shadow:0 30px 64px -24px rgba(69,82,46,0.4);
+    padding:48px 44px 42px;
+    text-align:center;
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .oferta-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:6px;
+    background:linear-gradient(90deg, var(--check), var(--primary) 55%, var(--cta));
+  }
+  .oferta-ribbon{
+    position:absolute;
+    top:22px; right:-42px;
+    background:var(--cta);
+    color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    letter-spacing:0.04em;
+    padding:6px 50px;
+    transform:rotate(40deg);
+    box-shadow:0 8px 16px -4px rgba(193,80,46,0.5);
+  }
+  .oferta-list{list-style:none; text-align:left; margin:26px 0; display:flex; flex-direction:column; gap:14px;}
+  .oferta-list li{
+    font-size:0.98rem;
+    padding-left:34px;
+    position:relative;
+  }
+  .oferta-list li::before{
+    content:"✓";
+    position:absolute; left:0; top:-1px;
+    width:22px; height:22px;
+    border-radius:50%;
+    background:rgba(110,139,74,0.14);
+    color:var(--check);
+    font-weight:700;
+    font-size:0.78rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .oferta-list li.is-bonus::before{
+    content:"🎁";
+    background:rgba(193,80,46,0.14);
+    font-size:0.72rem;
+  }
+  .oferta-list li.is-bonus{color:var(--text-soft);}
+  .oferta-divider{
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--line), transparent);
+    margin:8px 0 6px;
+  }
+  .price-row{
+    display:flex; align-items:baseline; justify-content:center; gap:14px;
+    margin:20px 0 6px;
+  }
+  .price-old{font-size:1.1rem; color:var(--text-soft); text-decoration:line-through;}
+  .price-new{font-family:'Fraunces',serif; font-size:2.9rem; color:var(--primary); font-weight:700; letter-spacing:-0.02em;}
+  .price-note{color:var(--text-soft); font-size:0.88rem; margin-bottom:28px;}
+  .oferta-card .cta-btn{width:100%; justify-content:center;}
+  .valor-total{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.78rem;
+    color:var(--text-soft);
+    background:var(--bg-alt);
+    padding:6px 14px;
+    border-radius:100px;
+  }
+
+  /* ===== GARANTIA ===== */
+  .garantia{
+    display:flex; align-items:center; gap:28px;
+    max-width:760px; margin:0 auto;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:32px 36px;
+  }
+  .garantia .seal{
+    flex-shrink:0;
+    width:88px;height:88px;
+    border-radius:50%;
+    border:3px solid var(--check);
+    color:var(--check);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+    font-size:1.5rem;
+  }
+  .garantia h3{font-size:1.2rem; margin-bottom:6px;}
+  .garantia p{color:var(--text-soft);}
+
+  /* ===== FAQ ===== */
+  .faq-item{
+    border-bottom:1px solid var(--line);
+  }
+  .faq-item summary{
+    cursor:pointer;
+    list-style:none;
+    padding:22px 4px;
+    font-weight:600;
+    font-size:1.02rem;
+    color:var(--primary);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+  }
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{
+    content:"+";
+    font-family:'IBM Plex Mono', monospace;
+    font-size:1.3rem;
+    color:var(--cta);
+    flex-shrink:0;
+    transition:transform .25s ease;
+  }
+  .faq-item[open] summary::after{transform:rotate(45deg);}
+  .faq-item .faq-a{
+    color:var(--text-soft);
+    padding:0 4px 22px;
+    font-size:0.97rem;
+    max-width:640px;
+  }
+
+  /* ===== FOOTER CTA ===== */
+  .final-cta{
+    text-align:center;
+    background:
+      radial-gradient(800px 400px at 15% 0%, rgba(110,139,74,0.14), transparent 60%),
+      radial-gradient(700px 400px at 100% 100%, rgba(193,80,46,0.12), transparent 60%),
+      var(--primary);
+    color:#fff;
+    padding:80px 0;
+  }
+  .final-cta h2{color:#fff; font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:16px;}
+  .final-cta p{color:rgba(255,255,255,0.75); margin-bottom:30px;}
+  footer{
+    text-align:center;
+    padding:26px;
+    font-size:0.8rem;
+    color:var(--text-soft);
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  @media (max-width: 900px){
+    .hero-grid{grid-template-columns:1fr; gap:44px;}
+    .hero{padding:56px 0 64px; text-align:center;}
+    .hero .eyebrow{margin-left:auto; margin-right:auto;}
+    .hero p.sub{margin-left:auto; margin-right:auto;}
+    .hero .cta-btn{width:100%; justify-content:center;}
+    .doc-stage{height:auto; margin-top:12px; padding-bottom:60px;}
+    .doc-card{position:relative; top:auto; left:auto; right:auto; margin:0 auto; max-width:420px; transform:rotate(2deg); animation:none;}
+    .stamp{width:104px; height:104px; font-size:0.7rem; bottom:-38px; right:6px;}
+    .vant-grid, .pq-grid, .bonus-grid{grid-template-columns:1fr;}
+    .entreg-grid{grid-template-columns:repeat(2, 1fr);}
+    .entreg-card.is-hero{grid-column:span 2;}
+    .entreg-item{grid-template-columns:56px 1fr; gap:18px;}
+    .entreg-num{height:48px;}
+    .garantia{flex-direction:column; text-align:center; padding:28px 24px;}
+    section{padding:60px 0;}
+    .oferta-card{padding:40px 26px 34px;}
+    .price-new{font-size:2.4rem;}
+    .oferta-ribbon{top:16px; right:-46px; font-size:0.7rem; padding:5px 46px;}
+    .final-cta{padding:60px 0;}
+  }
+
+  @media (max-width: 480px){
+    .topbar{font-size:0.72rem; padding:8px 12px;}
+    .hero{padding:44px 0 52px;}
+    .hero h1{font-size:1.7rem;}
+    .hero p.sub{font-size:1rem;}
+    .cta-btn{padding:16px 22px; font-size:0.95rem;}
+    .doc-card{padding:22px 20px; max-width:100%;}
+    .stamp{width:88px; height:88px; font-size:0.62rem; bottom:-30px; right:0;}
+    .section-head h2{font-size:1.5rem;}
+    .entreg-item{grid-template-columns:44px 1fr; gap:14px; padding:26px 0;}
+    .entreg-num{height:40px; font-size:0.66rem;}
+    .entreg-item h3{font-size:1.1rem;}
+    .entreg-grid{grid-template-columns:1fr;}
+    .entreg-card.is-hero{grid-column:span 1; grid-template-columns:1fr; text-align:center;}
+    .entreg-card.is-hero .entreg-icon{margin:0 auto 16px;}
+    .bonus-card{padding:22px;}
+    .oferta-card{padding:34px 20px 30px; border-radius:18px;}
+    .oferta-ribbon{display:none;}
+    .price-new{font-size:2rem;}
+    .price-old{font-size:0.95rem;}
+    .garantia .seal{width:72px; height:72px; font-size:1.2rem;}
+    .final-cta h2{font-size:1.4rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">📋 <b>Atenção:</b> PEI mal formulado gera retrabalho e questionamento — confira antes de entregar o seu</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="reveal d1">
+      <span class="eyebrow">PEI · PDI · Educação Especial</span>
+      <h1>Seu PEI pode estar <em>errado</em> — e a correção não precisa de curso caro, <em>só dos modelos certos</em></h1>
+      <p class="sub">Modelos prontos e revisados pra TEA, TDAH, Dislexia e outras necessidades — você só personaliza e entrega, sem inventar do zero a cada aluno.</p>
+      <a href="#oferta" class="cta-btn">Quero fazer meu PEI com segurança →</a>
+    </div>
+    <div class="doc-stage reveal d3">
+      <div class="doc-card">
+        <div class="doc-head">
+          <span>PEI · 2026.1</span>
+          <span>REV. 03</span>
+        </div>
+        <div class="doc-line w80"></div>
+        <div class="doc-line w60"></div>
+        <div class="doc-line error">✕ objetivo genérico, sem critério de avaliação</div>
+        <div class="doc-line fixed">✓ objetivo mensurável, alinhado ao diagnóstico</div>
+        <div class="doc-line w95"></div>
+        <div class="doc-line w60"></div>
+        <div class="stamp">CONFORME<br>✓ REVISADO</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENTREGAVEIS -->
+<section id="entregaveis">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">O material</span>
+      <h2>Tudo que vem no PEI Blindado</h2>
+      <p>7 itens prontos pra usar — nada de montar do zero</p>
+    </div>
+    <div class="entreg-grid">
+      <div class="entreg-card is-hero reveal d1">
+        <div class="entreg-icon">📋</div>
+        <div>
+          <h3>Modelos de PEI/PDI por Diagnóstico</h3>
+          <p>Versões editáveis e específicas pra TEA, TDAH, Dislexia, Deficiência Intelectual e Altas Habilidades — já estruturadas do jeito que a coordenação/secretaria costuma exigir, sem montar do zero pra cada aluno.</p>
+        </div>
+      </div>
+      <div class="entreg-card is-core reveal d2">
+        <div class="entreg-icon">📝</div>
+        <h3>Guia de Preenchimento Sem Erro</h3>
+        <p>Passo a passo de cada campo, com exemplo de objetivo certo vs. genérico e os erros mais comuns que causam devolução.</p>
+      </div>
+      <div class="entreg-card is-core reveal d3">
+        <div class="entreg-icon">✅</div>
+        <h3>Checklist de Conformidade</h3>
+        <p>Verificação rápida antes de entregar, pra reduzir o risco de retrabalho ou questionamento depois.</p>
+      </div>
+      <div class="entreg-card is-core reveal d4">
+        <div class="entreg-icon">🎯</div>
+        <h3>Banco de Objetivos por Habilidade</h3>
+        <p>Objetivos prontos organizados por área de desenvolvimento — só selecionar e adaptar ao aluno.</p>
+      </div>
+      <div class="entreg-card is-core reveal d5">
+        <div class="entreg-icon">👨‍👩‍👧</div>
+        <h3>Relatório Devolutivo pra Família</h3>
+        <p>Documento pronto pra comunicar o progresso aos pais com clareza, evitando mal-entendido.</p>
+      </div>
+      <div class="entreg-card is-core reveal d1">
+        <span class="entreg-tag">BÔNUS</span>
+        <div class="entreg-icon">💬</div>
+        <h3>Perguntas de Reunião de Pais</h3>
+        <p>Respostas prontas pras perguntas mais difíceis que a família costuma fazer sobre o PEI.</p>
+      </div>
+      <div class="entreg-card is-core reveal d2">
+        <span class="entreg-tag">BÔNUS</span>
+        <div class="entreg-icon">📁</div>
+        <h3>Modelo de Estudo de Caso</h3>
+        <p>Estrutura pronta pra documentar a trajetória do aluno de forma defensável tecnicamente.</p>
+      </div>
+    </div>
+    <div class="entreg-count reveal">✓ <b>7 materiais inclusos</b> — tudo liberado no mesmo acesso</div>
+  </div>
+</section>
+
+<!-- VANTAGENS -->
+<section class="vantagens">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Por que importa</span>
+      <h2>Fazer certo importa mais do que fazer rápido</h2>
+    </div>
+    <div class="vant-grid">
+      <div class="vant-item reveal d1"><div class="ico">✕</div><p>PEI mal formulado pode gerar retrabalho, cobrança da coordenação e até questionamento da família</p></div>
+      <div class="vant-item reveal d2"><div class="ico">↻</div><p>Você para de copiar modelo genérico da internet sem saber se serve pro seu caso</p></div>
+      <div class="vant-item reveal d3"><div class="ico">✓</div><p>Ganha confiança técnica pra defender suas decisões pedagógicas numa reunião ou auditoria</p></div>
+      <div class="vant-item reveal d4"><div class="ico">⏱</div><p>Reduz o tempo de elaboração sem abrir mão da qualidade do documento</p></div>
+    </div>
+    <div class="vant-grid" style="margin-top:22px; grid-template-columns:1fr;">
+      <div class="vant-item reveal d5"><div class="ico">◆</div><p>Adapta pra cada diagnóstico específico, não um modelo único pra tudo</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PARA QUEM -->
+<section class="paraquem">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" style="background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.2);">Pra quem é</span>
+      <h2>Esse material é pra você que:</h2>
+    </div>
+    <div class="pq-grid">
+      <div class="pq-item reveal d1">Já teve um PEI devolvido ou questionado pela coordenação</div>
+      <div class="pq-item reveal d2">Não teve formação específica em educação especial mas precisa elaborar PEI mesmo assim</div>
+      <div class="pq-item reveal d3">Quer parar de usar modelo genérico "achado na internet" sem saber se está certo</div>
+      <div class="pq-item reveal d4">Atende aluno com TEA, TDAH, Dislexia ou outra necessidade específica agora</div>
+      <div class="pq-item reveal d5" style="grid-column:1/-1;">Prefere prevenir problema do que corrigir depois</div>
+    </div>
+  </div>
+</section>
+
+<!-- BONUS -->
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Bônus inclusos</span>
+      <h2>Além dos modelos, você ainda leva</h2>
+    </div>
+    <div class="bonus-grid">
+      <div class="bonus-card reveal d1">
+        <span class="bonus-tag">BÔNUS 1</span>
+        <h3>Perguntas Frequentes de Reunião de Pais</h3>
+        <p>Respostas prontas pras perguntas mais difíceis que a família costuma fazer sobre o PEI.</p>
+        <div class="bonus-value">Valor: R$27</div>
+      </div>
+      <div class="bonus-card reveal d2">
+        <span class="bonus-tag">BÔNUS 2</span>
+        <h3>Modelo de Estudo de Caso</h3>
+        <p>Estrutura pronta pra documentar a trajetória do aluno de forma defensável tecnicamente.</p>
+        <div class="bonus-value">Valor: R$37</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GARANTIA -->
+<section>
+  <div class="wrap">
+    <div class="garantia reveal">
+      <div class="seal">30d</div>
+      <div>
+        <h3>30 dias de garantia incondicional</h3>
+        <p>Não serviu pro seu caso? Devolvemos 100% em até 30 dias, sem burocracia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OFERTA -->
+<section class="oferta" id="oferta">
+  <div class="wrap">
+    <div class="oferta-card reveal">
+      <div class="oferta-ribbon">-69%</div>
+      <span class="eyebrow">Tudo que você leva hoje</span>
+      <ul class="oferta-list" style="margin-top:24px;">
+        <li>Modelos de PEI/PDI por Diagnóstico (TEA, TDAH, Dislexia, DI, Altas Habilidades)</li>
+        <li>Guia de Preenchimento Sem Erro</li>
+        <li>Checklist de Conformidade</li>
+        <li>Banco de Objetivos por Habilidade</li>
+        <li>Modelo de Relatório Devolutivo pra Família</li>
+        <li class="is-bonus">Perguntas Frequentes de Reunião de Pais</li>
+        <li class="is-bonus">Modelo de Estudo de Caso</li>
+      </ul>
+      <div class="oferta-divider"></div>
+      <div class="valor-total">Valor total: R$127</div>
+      <div class="price-row">
+        <span class="price-old">R$97</span>
+        <span class="price-new">R$29,90</span>
+      </div>
+      <div class="price-note">à vista ou em até 12x no cartão</div>
+      <a href="#" class="cta-btn">Quero fazer meu PEI com segurança</a>
+      <div class="cta-sub">Pix, cartão em até 12x, acesso imediato após confirmação — sem precisar falar com ninguém no WhatsApp</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="wrap" style="max-width:760px;">
+    <div class="section-head reveal">
+      <span class="eyebrow">Dúvidas</span>
+      <h2>Perguntas frequentes</h2>
+    </div>
+    <div class="reveal">
+      <details class="faq-item" open>
+        <summary>Serve pra qualquer rede de ensino (municipal, estadual, particular)?</summary>
+        <div class="faq-a">Os modelos são adaptáveis — você ajusta os campos conforme a exigência da sua rede.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Preciso ter formação em educação especial pra usar?</summary>
+        <div class="faq-a">Não. O guia de preenchimento existe justamente pra quem não teve essa formação.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Funciona pra mais de um aluno?</summary>
+        <div class="faq-a">Sim, uso ilimitado, quantos alunos você atender.</div>
+      </details>
+      <details class="faq-item">
+        <summary>É só PDF ou também editável?</summary>
+        <div class="faq-a">Os modelos vêm em formato editável, pra você personalizar por aluno.</div>
+      </details>
+      <details class="faq-item">
+        <summary>E se eu não conseguir aplicar sozinho(a)?</summary>
+        <div class="faq-a">30 dias de garantia total — sem risco pra você.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="wrap">
+    <h2 class="reveal">Pare de adivinhar. Comece a preencher com segurança.</h2>
+    <p class="reveal d1">R$29,90 · acesso imediato · garantia de 30 dias</p>
+    <a href="#oferta" class="cta-btn reveal d2">Quero meu PEI Blindado agora →</a>
+  </div>
+</section>
+
+<footer>PEI BLINDADO — MATERIAL DE APOIO TÉCNICO PARA EDUCADORES · TODOS OS DIREITOS RESERVADOS</footer>
+
+</body>
+</html>
